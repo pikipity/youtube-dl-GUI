@@ -120,8 +120,14 @@ DownloadButton.pack(side="left")
 OpenButton=Tkinter.Button(ControlFrame,text="Open in the finder",command=OpenDir)
 OpenButton.pack(side="left")
 
-DownloadInfo=Tkinter.Text(root,width=42)
-DownloadInfo.pack()
+DownloadInfoFrame=Tkinter.Frame(root)
+DownloadInfoFrame.pack()
+DownloadInfo=Tkinter.Text(DownloadInfoFrame,width=42)
+DownloadInfo.pack(side="left",fill="y")
+sl=Tkinter.Scrollbar(DownloadInfoFrame)
+sl.pack(side="left",fill="y")
+DownloadInfo['yscrollcommand']=sl.set
+sl['command']=DownloadInfo.yview
 
 #DownloadArrayFrame=Tkinter.Frame(root)
 #DownloadArrayFrame.pack()
