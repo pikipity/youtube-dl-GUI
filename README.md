@@ -7,6 +7,6 @@ youtube-dl GUI
 
 仅在 OSX 上测试通过，尚未在 Windows 上测试。如果在 OSX 上发现无法使用，请先在终端下移动到此软件的安装目录下，用下面的命令给予 youtube-dl 权限：
 
-    sudo chmod a+x /usr/local/bin/youtube-dl
+    sudo chmod a+x 安装目录/youtube-dl
     
 支持的视频网站及问题请到[官网说明文档](http://rg3.github.io/youtube-dl/documentation.html)查询
