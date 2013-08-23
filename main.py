@@ -5,6 +5,7 @@ import sys
 import tkFileDialog
 import xerox
 import tkMessageBox
+import tkSimpleDialog
 import threading
 import subprocess
 import time
@@ -159,9 +160,99 @@ def ChooseOptions():
 def ChooseOptionsOK():
     OptionsEntry.delete("0","end")
     for i in ChooseOptionsListbox.curselection():
-        OptionsEntry.insert('end',Options[int(i)][0:Options[int(i)].find("    ")+1])
+        if Options[int(i)][0:Options[int(i)].find("    ")+1]=="--playlist-start NUMBER ":
+            try:
+                i="--playlist-start %s "%tkSimpleDialog.askinteger("Playlist Start","What is the playlist start number?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--playlist-end NUMBER ":
+            try:
+                i="--playlist-end %s "%tkSimpleDialog.askinteger("Playlist End","What is the playlist end number?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--match-title REGEX ":
+            try:
+                i="--match-title %s "%tkSimpleDialog.askstring("Title","What is the match title?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--reject-title REGEX ":
+            try:
+                i="--reject-title %s "%tkSimpleDialog.askstring("Title","What is the reject title?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--max-downloads NUMBER ":
+            try:
+                i="--max-downloads %s "%tkSimpleDialog.askinteger("Max Downloads","What is the maximum download number?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--min-filesize SIZE ":
+            try:
+                i="--min-filesize %s "%tkSimpleDialog.askstring("Minimum file size", "What is the minimum file size?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--max-filesize SIZE ":
+            try:
+                i="--max-filesize %s "%tkSimpleDialog.askinteger("Maximum file size","What is the maximum file size?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--date DATE ":
+            try:
+                i="--date %s "%tkSimpleDialog.askstring("Video Upload Date","What is the date in which you want to download video?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--datebefore DATE ":
+            try:
+                i="--datebefore %s "%tkSimpleDialog.askstring("Video Upload Data","What is the date before which you want to download video?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--dateafter DATE ":
+            try:
+                i="--dateafter %s "%tkSimpleDialog.askstring("Video Upload Data","What is the date after which you want to download video?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="-r LIMIT ":
+            try:
+                i="-r %s "%tkSimpleDialog.askstring("Maximum speed","Waht is the maximum download speed?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="-R RETRIES ":
+            try:
+                i="-R %s "%tkSimpleDialog.askstring("Maximum number of retries","What is the maximum number of retries?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--buffer-size SIZE ":
+            try:
+                i="--buffer-size %s "%tkSimpleDialog.askstring("Maximum buffer size","What is the maximum buffer size?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--sub-lang LANG ":
+            try:
+                i="--sub-lang %s "%tkSimpleDialog.askstring("Language","what is the language that you want to download?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        elif Options[int(i)][0:Options[int(i)].find("    ")+1]=="--audio-quality QUALITY ":
+            try:
+                i="--audio-quality %s "%tkSimpleDialog.askinteger("Quality","What is the Quality that you want to download?")
+                OptionsEntry.insert('end',i)
+            except:
+                continue
+        else:
+            OptionsEntry.insert('end',Options[int(i)][0:Options[int(i)].find("    ")+1])
     ChooseOptionsWindow.destroy()
-    tkMessageBox.showwarning("Note","Some options may need to be adjusted by yourself.")
 ########################################################################
 
 
