@@ -13,6 +13,38 @@ import os
 ProgramPath=sys.argv[0][0:sys.argv[0].rfind('/')]#no final "/"
 DownloadProgram=ProgramPath+'/youtube-dl'
 DownloadPathDefault=ProgramPath+'/Downloads/'
+Options=["--playlist-start NUMBER    playlist video to start at (default is 1)",
+         "--playlist-end NUMBER      playlist video to end at (default is last)",
+         "--match-title REGEX        download only matching titles (regex or caseless sub-string)",
+         "--reject-title REGEX       skip download for matching titles (regex or caseless sub-string)",
+         "--max-downloads NUMBER     Abort after downloading NUMBER files",
+         "--min-filesize SIZE        Do not download any videos smaller than SIZE (e.g. 50k or 44.6m)",
+         "--max-filesize SIZE        Do not download any videos larger than SIZE (e.g. 50k or 44.6m)",
+         "--date DATE                download only videos uploaded in this date",
+         "--datebefore DATE          download only videos uploaded before this date",
+         "--dateafter DATE           download only videos uploaded after this date",
+         "-r LIMIT     maximum download rate (e.g. 50k or 44.6m)",
+         "-R RETRIES      number of retries (default is 10)",
+         "--buffer-size SIZE         size of download buffer (e.g. 1024 or 16k) (default is 1024)",
+         "-t    use title in file name (default)",
+         "--id    use only video ID in file name",
+         "-A    number downloaded files starting from 00000",
+         "-w    do not overwrite files",
+         "-c    resume partially downloaded files",
+         "--no-continue    do not resume partially downloaded files (restart from beginning)",
+         "--no-part    do not use .part files",
+         "--write-description        write video description to a .description file",
+         "--write-info-json          write video metadata to a .info.json file",
+         "--write-thumbnail          write thumbnail image to disk",
+         "-g     simulate, quiet but print URL",
+         "-e    simulate, quiet but print title",
+         "--get-id    simulate, quiet but print id",
+         "--get-thumbnail            simulate, quiet but print thumbnail URL",
+         "--get-description          simulate, quiet but print video description",
+         "--get-filename             simulate, quiet but print output filename",
+         "--get-format               simulate, quiet but print output format",
+         "--sub-lang LANG            language of the subtitles to download (optional) use IETF language tags like 'en'",
+         "--audio-quality QUALITY    ffmpeg/avconv audio quality specification, inser a value between 0 (better) and 9 (worse) for VBR or a specific bitrate like 128K (default 5)"]
 #DoenloadArrayLock=threading.Lock()
 ###################################################################
 #选择下载路径
@@ -40,36 +72,38 @@ def PasteURL():
 #        threading.Thread.__init__(self)
 ###################################################################
 #Download
-def DownloadProcess(DownloadURL,DownloadPath):
+def DownloadProcess(DownloadURL,DownloadPath,DownloadOptions):
     if DownloadURL[0:4]!="http" and DownloadURL[0:5]!="https":
         tkMessageBox.showwarning("Wrong URL","%s is not a correct URL (include http or https)" \
                                              %DownloadURL)
     else:
-        P=subprocess.Popen("%s --newline %s -o '%s"%(DownloadProgram,DownloadURL,DownloadPath)+"%(title)s.%(ext)s'", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        P=subprocess.Popen("%s --newline %s %s -o '%s"%(DownloadProgram,DownloadOptions,DownloadURL,DownloadPath)+"%(title)s.%(ext)s'", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         DownloadInfo.delete(1.0,"end")
         DownloadButton['state']='disable'
-        while P.stdout.readline()!='':
-            P.stdout.readline()
-            DownloadInfo.insert(1.0,"%s\n"%P.stdout.readline())
+        tmp=P.stdout.readline()
+        while tmp!='':
+            DownloadInfo.insert(1.0,"%s\n"%tmp)
             if P.stdout.readline().find("Error")>=0 or P.stdout.readline().find("error")>=0 or P.stdout.readline().find("ERROR")>=0:
                 tkMessageBox.showwarning("Downlad Fail","There is something wrong. Please double check inputs.")
                 break
-                time.sleep(1)
+            else:
+                tmp=P.stdout.readline()
         DownloadInfo.insert(1.0,"%s\n"%"Finish!!")
         DownloadButton['state']='normal'
 #开始下载
 def BeginDownload():
     DownloadPath=DownloadPathEntry.get()
     DownloadURL=DownloadURLEntry.get()
+    DownloadOptions=OptionsEntry.get()
     if os.path.exists(DownloadPath):
-        t=threading.Thread(target=DownloadProcess,args=(DownloadURL,DownloadPath))
+        t=threading.Thread(target=DownloadProcess,args=(DownloadURL,DownloadPath,DownloadOptions))
         t.start()
     else:
         if tkMessageBox.askquestion("Wrong Path",\
                                  "There isn't %s. Would you like to create it?"%DownloadPath)=='yes':
             try:
                 os.makedirs(DownloadPath)
-                t=threading.Thread(target=DownloadProcess,args=(DownloadURL,DownloadPath))
+                t=threading.Thread(target=DownloadProcess,args=(DownloadURL,DownloadPath,DownloadOptions))
                 t.start()
             except:
                 tkMessageBox.showwarning("Wrong Path","%s is not a path"\
@@ -90,6 +124,47 @@ def OpenDir():
                 tkMessageBox.showwarning("Wrong Path","%s is not a path" \
                                                       %DownloadPath)
 #######################################################################
+#选择options
+def ChooseOptions():
+    global ChooseOptionsWindow
+    ChooseOptionsWindow=Tkinter.Toplevel(root)
+    ChooseOptionsLabel1=Tkinter.Label(ChooseOptionsWindow,\
+                                     text="Please choose options: ")
+    ChooseOptionsLabel1.pack()
+    ChooseOptionsLabel2=Tkinter.Label(ChooseOptionsWindow,\
+                                      text="(You can choose one or more options)")
+    ChooseOptionsLabel2.pack()
+    ChooseOptionsListboxFrame=Tkinter.Frame(ChooseOptionsWindow)
+    ChooseOptionsListboxFrame.pack()
+    global ChooseOptionsListbox
+    ChooseOptionsListbox=Tkinter.Listbox(ChooseOptionsListboxFrame,selectmode="multiple",width=45)
+    ChooseOptionsListbox.pack(side="left")
+    ChooseOptionsListboxSl=Tkinter.Scrollbar(ChooseOptionsListboxFrame)
+    ChooseOptionsListboxSl.pack(side="left",fill="y")
+    ChooseOptionsListbox['yscrollcommand']=ChooseOptionsListboxSl.set
+    ChooseOptionsListboxSl['command']=ChooseOptionsListbox.yview
+    for i in Options:
+        ChooseOptionsListbox.insert('end',i)
+    ChooseOptionsListboxSlx=Tkinter.Scrollbar(ChooseOptionsWindow,orient='horizontal')
+    ChooseOptionsListboxSlx.pack(fill="x")
+    ChooseOptionsListbox['xscrollcommand']=ChooseOptionsListboxSlx.set
+    ChooseOptionsListboxSlx['command']=ChooseOptionsListbox.xview
+
+    ChooseOptionsControlFrame=Tkinter.Frame(ChooseOptionsWindow)
+    ChooseOptionsControlFrame.pack()
+    ChooseOptionsOKButton=Tkinter.Button(ChooseOptionsControlFrame,text="OK",command=ChooseOptionsOK)
+    ChooseOptionsOKButton.pack(side="left")
+    ChooseOptionsCancelButton=Tkinter.Button(ChooseOptionsControlFrame,text="Cancel",command=ChooseOptionsWindow.destroy)
+    ChooseOptionsCancelButton.pack(side="left")
+def ChooseOptionsOK():
+    OptionsEntry.delete("0","end")
+    for i in ChooseOptionsListbox.curselection():
+        OptionsEntry.insert('end',Options[int(i)][0:Options[int(i)].find("    ")+1])
+    ChooseOptionsWindow.destroy()
+    tkMessageBox.showwarning("Note","Some options may need to be adjusted by yourself.")
+########################################################################
+
+
 
 #主程序
 root=Tkinter.Tk()
@@ -113,6 +188,15 @@ DownloadURLEntry.pack(side="left")
 DownloadURLButton=Tkinter.Button(DownloadURLFrame,text="Paste",command=PasteURL)
 DownloadURLButton.pack(side="left")
 
+OptionsFrame=Tkinter.Frame(root)
+OptionsFrame.pack()
+OptionsLabel=Tkinter.Label(OptionsFrame,text="Options: ",width=12)
+OptionsLabel.pack(side="left")
+OptionsEntry=Tkinter.Entry(OptionsFrame)
+OptionsEntry.pack(side="left")
+OptionsButton=Tkinter.Button(OptionsFrame,text="...",command=ChooseOptions)
+OptionsButton.pack(side="left")
+
 ControlFrame=Tkinter.Frame(root)
 ControlFrame.pack()
 DownloadButton=Tkinter.Button(ControlFrame,text='Download',command=BeginDownload)
@@ -122,7 +206,7 @@ OpenButton.pack(side="left")
 
 DownloadInfoFrame=Tkinter.Frame(root)
 DownloadInfoFrame.pack()
-DownloadInfo=Tkinter.Text(DownloadInfoFrame,width=42)
+DownloadInfo=Tkinter.Text(DownloadInfoFrame,width=48)
 DownloadInfo.pack(side="left",fill="y")
 sl=Tkinter.Scrollbar(DownloadInfoFrame)
 sl.pack(side="left",fill="y")
