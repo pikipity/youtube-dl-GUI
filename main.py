@@ -136,7 +136,7 @@ class DownloadTask(threading.Thread):
                             if choosing>=self.position:
                                 choosing=choosing-1
                             self.position=self.position-1
-                    Info="%s: Error"%(self.name)
+                    Info="%s: Error  Path: %s"%(self.name,self.path)
                     DownloadArray.insert(self.position,Info)
                     DownloadArray.selection_set(choosing)
                     DownloadInfo.insert(1.0,'%s: Error. Please double check it\n'%self.name)
@@ -185,7 +185,7 @@ class DownloadTask(threading.Thread):
                 if self.position!=0:
                     if DownloadArray.get(self.position-1)=='':
                         self.position=self.position-1
-                Info="%s: finish!!"%(self.name)
+                Info="%s: finish!! Path: %s"%(self.name,self.path)
                 DownloadArray.insert(self.position,Info)
                 DownloadInfo.insert(1.0,'%s: finish!!\n'%self.name)
                 DownloadArrayLock.release()
@@ -193,7 +193,6 @@ class DownloadTask(threading.Thread):
                 while k:
                     DownloadArrayLock.acquire()
                     if tmp==DownloadArray.get(self.position):
-                        DownloadArray.delete(self.position)
                         if self.position!=0:
                             if DownloadArray.get(self.position-1)=='':
                                 self.position=self.position-1
@@ -243,7 +242,13 @@ def BeginDownload():
 ###################################################################
 #打开文件夹
 def OpenDir():
-    DownloadPath=DownloadPathEntry.get()
+    if DownloadArray.curselection()==():
+        DownloadPath=DownloadPathEntry.get()
+    else:
+        DownloadArrayLock.acquire()
+        tmp=DownloadArray.get(DownloadArray.curselection()[0])
+        DownloadArrayLock.release()
+        DownloadPath=tmp[tmp.find('Path:')+6:len(tmp)]
     if os.path.exists(DownloadPath):
         os.system("open %s"%DownloadPath)
     else:
