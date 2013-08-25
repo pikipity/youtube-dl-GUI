@@ -14,6 +14,10 @@ youtube-dl GUI
 如果发现无法正常下载，请在解压目录下打开终端，用下面的命令给予 youtube-dl 权限：
 
     sudo chmod a+x ./youtube-dl
+    
+如果你想双击文件即可使用，在解压文件夹下打开终端，使用下面命令，然后将main.py的打开方式改为“终端”，双击main.py即可打开程序
+
+    sudo chmod a+x ./main.py
 
 ### 使用说明
 
